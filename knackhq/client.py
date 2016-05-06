@@ -1,66 +1,57 @@
 
 """ KnackHQ REST Client. """
 
+
 import collections
-import os
 import json
-import urllib
+import os
 
 import certifi
 import urllib3
+from .knackhq import KnackHQObject
 
 
-class KnackHQObject(collections.Mapping):
-    """ KnackHQ Object (ie, table).
+class KnackHQClient(collections.Iterable):
+    """ KnackHQ root client.
+
+        Use arguments or ENV variables to initialize client.
+
+        Optional ENV variables are:
+            * KNACKHQ_APP_ID
+            * KNACKHQ_API_KEY
+            * KNACKHQ_ENDPOINT
 
         Arguments:
-            client (KnackHQClient):  KnackHQClient instance
-            url    (str):            URL to object resource
-
-        Iterate over records in an object with:
-
-            for record in object:
-                # do something
-
-        Iterate over filtered records in an object with:
-
-            filters = [
-                {
-                    field: 'field_1',
-                    operator: 'is',
-                    value: 'test'
-                }, {
-                    field: 'field_2',
-                    operator: 'is not blank'
-                }
-            ]
-
-            for record in object.where(*filters):
-                # do something
+            app_id   (str):  Application ID string
+            api_key  (str):  API key
+            endpoint (str):  KnackHQ endpoint (default: https://api.knackhq.com/v1)
     """
-    def __init__(self, client, url):
-        self.client = client
-        self.url = url
-        self.__object = None
-
     @property
-    def _object(self):
-        """ Memoized response of a GET on the object. """
-        if self.__object is None:
-            self.__object = self.client.request(self.url)
-        return self.__object
+    def _headers(self):
+        """ Helper to define request headers. """
+        return {
+            "Content-Type": "application/json",
+            "X-Knack-Application-Id": self._app_id,
+            "X-Knack-REST-API-Key": self._api_key
+        }
 
-    def __getitem__(self, key):
-        return self._object[key]
+    def __init__(self, app_id=None, api_key=None, endpoint=None):
+        self._app_id = app_id or os.getenv('KNACKHQ_APP_ID')
+        self._api_key = api_key or os.getenv('KNACKHQ_API_KEY')
+        self._endpoint = endpoint or os.getenv('') \
+            or os.getenv('KNACKHQ_ENDPOINT') \
+            or 'https://api.knackhq.com/v1'
+
+    def __repr__(self):
+        return "<KnackHQClient %s>" % self._endpoint
 
     def __iter__(self):
-        return self.where()
+        return self.get_objects()
 
     def __len__(self):
-        page = self.records()
-        return page['total_records']
+        len(list(self))
 
-    def get_url(self, *path):
+    def endpoint(self, *path):
         """ Helper to get URL of object or its children
 
             Arguments:
@@ -69,108 +60,7 @@ class KnackHQObject(collections.Mapping):
             Returns:
                 URL string for object-resource.
         """
-        return self.client.get_url('objects', self.key(), *path)
-
-    def key(self):
-        """ Helper to get object key (eg, object_123). """
-        return self['object']['key']
-
-    def fields(self):
-        """ Helper to get fields of object. """
-        return self['object']['fields']
-
-    def field_key(self, name):
-        """ Helper to get field key from field name for object-fields.
-
-            Arguments:
-                name (str):  Name of object-field
-
-            Returns:
-                key of field (eg. field_123).
-
-            Raises:
-                KeyError on field not found.
-        """
-        for field in self.fields():
-            if field['name'] == name:
-                return field['key']
-        raise KeyError
-
-    def records(self, **kwargs):
-        """ Get records from a REST request.
-
-            Arguments:
-                page          (int):   Optional page number
-                rows_per_page (int):   Optional rows per page number
-                sort_field    (str):   Optional sort field key
-                sort_order    (str):   Optional sort order
-                filters       (list):  Optional list of filter dicts
-
-            Returns:
-                REST response JSON dict.
-        """
-        url = self.client.get_url('objects', self.key(), 'records')
-        url += '?'
-        for key, val in kwargs.iteritems():
-            if key == 'filters':
-                val = urllib.quote_plus(json.dumps(val))
-            url += "%s=%s&" % (key, val)
-        return self.client.request(url)
-
-    def record(self, record_id):
-        """ Get record by ID.
-
-            Arguments:
-                record_id (str):  Record ID string
-
-            Returns:
-                REST response JSON dict.
-        """
-        url = self.client.get_url('objects', self.key(), 'records', record_id)
-        return self.client.request(url)
-
-    def where(self, *filters):
-        """ Iterate over object records with filters.
-
-            Arguments:
-                filters (tuple):  Optional tuple of filter dicts
-
-            Returns:
-                Iterator of filtered results.
-        """
-        filters = list(filters) or None
-        page = self.records(filters=filters)
-        current_page = int(page['current_page'])
-        total_pages = int(page['total_pages'])
-        while current_page <= total_pages:
-            for record in page['records']:
-                yield record
-            page = self.records(page=current_page+1, filters=filters)
-            current_page = int(page['current_page'])
-            total_pages = int(page['total_pages'])
-
-
-class KnackHQClient(object):
-    """ KnackHQ root client.
-
-        Arguments:
-            app_id   (str):  Application ID string
-            api_key  (str):  API key
-            endpoint (str):  Optional KnackHQ endpoint
-    """
-    def __init__(self, app_id, api_key, endpoint='https://api.knackhq.com/v1'):
-        self.app_id = app_id
-        self.api_key = api_key
-        self.endpoint = endpoint
-
-    @property
-    def headers(self):
-        """ Helper to define request headers. """
-        return {
-            "Content-Type": "application/json",
-            "X-Knack-Application-Id": self.app_id,
-            "X-Knack-REST-API-Key": self.api_key
-        }
+        return os.path.join(self._endpoint, *path)
 
     def request(self, url, verb='GET', **kwargs):
         """ Send a request to the API.
@@ -187,28 +77,26 @@ class KnackHQClient(object):
                 ValueError on bad response.
         """
         http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-        resp = http.request(verb, url, headers=self.headers, **kwargs)
+        resp = http.request(verb, url, headers=self._headers, **kwargs)
         try:
             return json.loads(resp.data)
         except ValueError as err:
             err.message += "\n%s" % resp.data
             raise err
 
-    def get_url(self, *path):
-        """ Helper to get URL of object or its children
+    def get_objects(self, name=None):
+        """ Yield a collection of objects. If a name is supplied only objects
+            with that name are returned.
 
             Arguments:
-                path (tuple):  Optional additional children
+                name (str):  Optional name filter for objects
 
             Returns:
-                URL string for object-resource.
+                Iterator of KnackHQObjects
         """
-        return os.path.join(self.endpoint, *path)
-
-    def get_objects(self):
-        """ Get all objects for app. """
-        url = self.get_url('objects')
-        return self.request(url)
+        for item in self.request(self.endpoint('objects')).get('objects', []):
+            if name is None or item['name'] == name:
+                yield KnackHQObject(self, item['key'])
 
     def get_object(self, key=None, name=None):
         """ Get object by key or name. If a key is not provided it
@@ -227,8 +115,7 @@ class KnackHQClient(object):
         """
         if key is None:
             key = self.get_object_key(name)
-        url = self.get_url('objects', key)
-        return KnackHQObject(self, url)
+        return KnackHQObject(self, key)
 
     def get_object_key(self, name):
         """ Helper to get object key from object name.
@@ -242,8 +129,9 @@ class KnackHQClient(object):
             Raises:
                 KeyError on object not found.
         """
-        objects = self.get_objects()
-        for obj in objects['objects']:
-            if obj['name'] == name:
-                return obj['key']
+        objects = list(self.get_objects(name))
+        if len(objects) == 1:
+            return objects[0].key
+        elif len(objects) > 1:
+            raise KeyError("More than one object named '%s'" % name)
         raise KeyError
