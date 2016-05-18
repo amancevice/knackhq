@@ -10,14 +10,18 @@ from urlparse import urlparse
 
 
 class KnackHQRecord(collections.Mapping):
+    """ KnackHQ Record.
+    """
     @property
     def record(self):
+        """ Memoized response of a GET on the record. """
         if self._record is None:
-            self._record = self.object._client.request(self.url.geturl())
+            self._record = self.object.client.request(self.url.geturl())
         return self._record
 
     @property
     def object(self):
+        """ Get parent KnackHQObject. """
         return self._object
 
     def __init__(self, knackobj, url, record=None):
@@ -35,11 +39,13 @@ class KnackHQRecord(collections.Mapping):
         return len(self.record)
 
     def get_field(self, key):
+        """ Get value of record field by field key. """
         fields = [x for x in self.object['fields'] if x['name'] == key]
         if len(fields) == 1:
             field_key = fields[0]['key']
             field_raw = "%s_raw" % field_key
-            return dict([(key, val) for key, val in self.record.iteritems() if key in (field_key, field_raw)])
+            is_field = lambda x: x in (field_key, field_raw)
+            return dict([(key, val) for key, val in self.record.iteritems() if is_field(key)])
 
         raise KeyError("More than one field named '%s'" % key)
 
@@ -76,15 +82,15 @@ class KnackHQObject(collections.Iterable):
     def object(self):
         """ Memoized response of a GET on the object. """
         if self._object is None:
-            self._object = self._client.request(self.url.geturl())['object']
+            self._object = self.client.request(self.url.geturl())['object']
         return self._object
 
     def __init__(self, client, key):
-        self._client = client
+        self.client = client
         self._len = None
         self._object = None
         self.key = key
-        self.url = urlparse(self._client.endpoint('objects', key))
+        self.url = urlparse(self.client.endpoint('objects', key))
 
     def __repr__(self):
         return "<%s %s>" % (self['name'], self.url.path)
@@ -97,7 +103,7 @@ class KnackHQObject(collections.Iterable):
 
     def __len__(self):
         if self._len is None:
-            page = self.get_records()
+            page = self.get_records().next()
             self._len = page['total_records']
         return self._len
 
@@ -114,14 +120,14 @@ class KnackHQObject(collections.Iterable):
             Returns:
                 REST response JSON dict.
         """
-        url = self._client.endpoint('objects', self.key, 'records')
+        url = self.client.endpoint('objects', self.key, 'records')
         url += '?'
         for key, val in kwargs.iteritems():
             if key == 'filters':
                 val = urllib.quote_plus(json.dumps(val))
             url += "%s=%s&" % (key, val)
         try:
-            page = self._client.request(url)
+            page = self.client.request(url)
         except ValueError:
             raise StopIteration
         record_url = urlparse(url).path
@@ -140,8 +146,8 @@ class KnackHQObject(collections.Iterable):
             Returns:
                 REST response JSON dict.
         """
-        url = self._client.endpoint(self.url.path.lstrip('/'), 'records', record_id)
-        return self._client.request(url)
+        url = self.client.endpoint(self.url.path.lstrip('/'), 'records', record_id)
+        return self.client.request(url)
 
     def keys(self):
         """ Return keys of KnackHQ object definiton. """
