@@ -18,7 +18,7 @@ CLASSIFIERS = [
 REQUIRES = [
     "certifi>=2016.2.28",
     "urllib3>=1.12" ]
-TEST_REQUIRES = ["nose", "mock"]
+TESTS_REQUIRE = ["nose", "mock"]
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -41,5 +41,5 @@ setup(
     long_description     = read('README.md'),
     classifiers          = CLASSIFIERS,
     install_requires     = REQUIRES,
-    test_requires        = TEST_REQUIRES,
+    tests_require        = TESTS_REQUIRE,
     test_suite           = "nose.collector" )
