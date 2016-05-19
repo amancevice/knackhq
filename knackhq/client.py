@@ -58,13 +58,13 @@ class KnackHQClient(collections.Iterable):
         """
         return os.path.join(self._endpoint.geturl(), *path)
 
-    def request(self, url, verb='GET', **kwargs):
+    def request(self, endpoint, verb='GET', **kwargs):
         """ Send a request to the API.
 
             Arguments:
-                url    (str):   URL for request
-                verb   (str):   Optional verb of request
-                kwagrs (dict):  Optional additional request arguments
+                endpoint (str):   URL for request
+                verb     (str):   Optional verb of request
+                kwargs   (dict):  Optional additional request arguments
 
             Returns:
                 JSON response of request.
@@ -77,7 +77,7 @@ class KnackHQClient(collections.Iterable):
             "X-Knack-Application-Id": self._app_id,
             "X-Knack-REST-API-Key": self._api_key}
         http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-        resp = http.request(verb, url, headers=head, **kwargs)
+        resp = http.request(verb, endpoint, headers=head, **kwargs)
         try:
             return json.loads(resp.data)
         except ValueError as err:

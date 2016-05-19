@@ -34,6 +34,16 @@ client = knackhq.KnackHQClient()
 ## Reading from KnackHQ
 
 
+### Raw requests
+
+In some cases you may wish to send a raw HTTP request to the KnackHQ JSON API. This will not normally be necessary but it is available:
+
+```python
+client.request("https://api.knackhq.com/v1/objects/object_1", 'GET')
+client.request("https://api.knackhq.com/v1/objects/object_1", 'POST', body='{key: val}')
+```
+
+
 ### Reading Objects
 
 Iterate over objects in an app using the `client` object:
