@@ -28,7 +28,7 @@ class KnackHQRecord(collections.Mapping):
             self._record = self._client.request(self._endpoint)
         return self._record
 
-    def __init__(self, client, endpoint, record=None):
+    def __init__(self, client=None, endpoint=None, record=None):
         self._client = client
         self._endpoint = endpoint
         self._object = None
@@ -73,12 +73,12 @@ class KnackHQObject(collections.Iterable):
 
             filters = [
                 {
-                    field: 'field_1',
-                    operator: 'is',
-                    value: 'test'
+                    'field':    'field_1',
+                    'operator': 'is',
+                    'value':    'test'
                 }, {
-                    field: 'field_2',
-                    operator: 'is not blank'
+                    'field':    'field_2',
+                    'operator': 'is not blank'
                 }
             ]
 
@@ -92,10 +92,11 @@ class KnackHQObject(collections.Iterable):
             self._object = self._client.request(self._endpoint)['object']
         return self._object
 
-    def __init__(self, client, endpoint):
+    # pylint: disable=redefined-builtin
+    def __init__(self, client=None, endpoint=None, object=None):
         self._client = client
         self._endpoint = endpoint
-        self._object = None
+        self._object = object
 
     def __repr__(self):
         return "<KnackHQObject %s>" % urlparse(self._endpoint).path
@@ -125,12 +126,12 @@ class KnackHQObject(collections.Iterable):
 
                 filters = [
                     {
-                        field: 'field_1',
-                        operator: 'is',
-                        value: 'test'
+                        'field':    'field_1',
+                        'operator': 'is',
+                        'value':    'test'
                     }, {
-                        field: 'field_2',
-                        operator: 'is not blank'
+                        'field':    'field_2',
+                        'operator': 'is not blank'
                     }
                 ]
 

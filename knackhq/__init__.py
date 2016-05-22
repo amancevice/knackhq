@@ -5,4 +5,4 @@ from .client import KnackHQClient
 from .knackhq import KnackHQObject, KnackHQRecord
 
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
