@@ -92,11 +92,11 @@ class KnackHQObject(collections.Iterable):
             self._object = self._client.request(self._endpoint)['object']
         return self._object
 
-    # pylint: disable=redefined-builtin
+     # pylint: disable=redefined-builtin
     def __init__(self, client=None, endpoint=None, object=None):
         self._client = client
         self._endpoint = endpoint
-        self._object = object
+        self._object = object  # pylint: disable=redefined-builtin
 
     def __repr__(self):
         return "<KnackHQObject %s>" % urlparse(self._endpoint).path

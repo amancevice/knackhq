@@ -9,7 +9,6 @@ import os
 import certifi
 import urllib3
 from .knackhq import KnackHQObject
-from .exceptions import *
 
 
 class KnackHQClient(collections.Iterable):
@@ -87,7 +86,7 @@ class KnackHQClient(collections.Iterable):
                 DuplicateObjectError if object with same name already exists
         """
         try:
-            key = self._object_key(name)
+            self._object_key(name)
         except ObjectNotFoundError:
             endpoint = os.path.join(self._endpoint, 'objects')
             body = json.dumps({'name': name})
@@ -141,3 +140,23 @@ class KnackHQClient(collections.Iterable):
         elif len(objects) > 1:
             raise DuplicateObjectError("More than one object named '%s'" % name)
         raise ObjectNotFoundError(name)
+
+
+class ResponseError(ValueError):
+    """ KnackHQ Client Error. """
+    pass
+
+
+class DuplicateObjectError(ValueError):
+    """ KnackHQ Client Error. """
+    pass
+
+
+class ObjectNotFoundError(KeyError):
+    """ KnackHQ Client Error. """
+    pass
+
+
+class DuplicateFieldError(ValueError):
+    """ KnackHQ Client Error. """
+    pass
