@@ -2,7 +2,8 @@
 
 Python wrapper for [KnackHQ API](http://knackhq.com/)
 
-<img src="https://travis-ci.org/amancevice/knackhq.svg?branch=master"/>
+[![Build Status](https://travis-ci.org/amancevice/knackhq.svg?branch=master)](https://travis-ci.org/amancevice/knackhq)
+[![PyPI version](https://badge.fury.io/py/knackhq.svg)](https://badge.fury.io/py/knackhq)
 
 
 ## Installation

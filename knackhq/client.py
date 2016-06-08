@@ -9,6 +9,7 @@ import os
 import certifi
 import urllib3
 from .knackhq import KnackHQObject
+from .exceptions import *
 
 
 class KnackHQClient(collections.Iterable):
@@ -71,7 +72,30 @@ class KnackHQClient(collections.Iterable):
             return json.loads(resp.data)
         except ValueError as err:
             err.message += "\n%s" % resp.data
-            raise err
+            raise ResponseError(err)
+
+    def add_object(self, name):
+        """ Add an object to the app.
+
+            Arguments:
+                name (str):  Name of new object
+
+            Returns:
+                KnackHQObject instance
+
+            Raises:
+                DuplicateObjectError if object with same name already exists
+        """
+        try:
+            key = self._object_key(name)
+        except ObjectNotFoundError:
+            endpoint = os.path.join(self._endpoint, 'objects')
+            body = json.dumps({'name': name})
+            response = self.request(endpoint, 'POST', body=body)
+            endpoint = os.path.join(self._endpoint, 'objects', response['object']['key'])
+            return KnackHQObject(self, endpoint, **response)
+
+        raise DuplicateObjectError("More than one object named '%s'" % name)
 
     def get_object(self, key_or_name):
         """ Get object by key or name. If a key is not provided it
@@ -85,14 +109,18 @@ class KnackHQClient(collections.Iterable):
                 KnackHQObject instance.
 
             Raises:
-                KeyError if object not found when finding by name.
+                DuplicateObjectError on multiple objects with the same name.
+                ObjectNotFoundError on object not found.
         """
+
         try:
             endpoint = os.path.join(self._endpoint, 'objects', key_or_name)
             response = self.request(endpoint)
-            return KnackHQObject(client=self, endpoint=endpoint, **response)
-        except ValueError:
-            return self.get_object(self._object_key(key_or_name))
+        except ResponseError:
+            endpoint = os.path.join(self._endpoint, 'objects', self._object_key(key_or_name))
+            response = self.request(endpoint)
+
+        return KnackHQObject(client=self, endpoint=endpoint, **response)
 
     def _object_key(self, name):
         """ Helper to get object key from object name.
@@ -104,11 +132,12 @@ class KnackHQClient(collections.Iterable):
                 Key of object.
 
             Raises:
-                KeyError on object not found.
+                DuplicateObjectError on multiple objects with the same name.
+                ObjectNotFoundError on object not found.
         """
         objects = [x for x in self if x['name'] == name]
         if len(objects) == 1:
             return objects[0]['key']
         elif len(objects) > 1:
-            raise KeyError("More than one object named '%s'" % name)
-        raise KeyError(name)
+            raise DuplicateObjectError("More than one object named '%s'" % name)
+        raise ObjectNotFoundError(name)
