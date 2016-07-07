@@ -5,9 +5,17 @@ import collections
 import json
 import os
 import re
-import urllib
 
-from urlparse import urlparse
+# Python2
+try:
+    from urllib import quote_plus
+    from urlparse import urlparse
+
+# Python3
+except ImportError:
+    # pylint: disable=ungrouped-imports
+    from urllib.parse import urlparse
+    from urllib.parse import quote_plus
 
 
 class KnackHQRecord(collections.Mapping):
@@ -46,7 +54,7 @@ class KnackHQRecord(collections.Mapping):
                 field_key = fields[0]['key']
                 field_raw = "%s_raw" % field_key
                 is_field = lambda x: x in (field_key, field_raw)
-                return dict([(key, val) for key, val in self.record.iteritems() if is_field(key)])
+                return dict([(key, val) for key, val in self.record.items() if is_field(key)])
 
             raise KeyError("More than one field named '%s'" % key)
 
@@ -159,9 +167,9 @@ class KnackHQObject(collections.Iterable):
         else:
             endpoint = os.path.join(self._endpoint, 'records')
             endpoint += '?'
-            for key, val in kwargs.iteritems():
+            for key, val in kwargs.items():
                 if key == 'filters':
-                    val = urllib.quote_plus(json.dumps(val))
+                    val = quote_plus(json.dumps(val))
                 endpoint += "%s=%s&" % (key, val)
 
             # Yield records

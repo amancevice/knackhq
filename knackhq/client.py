@@ -70,8 +70,7 @@ class KnackHQClient(collections.Iterable):
         try:
             return json.loads(resp.data)
         except ValueError as err:
-            err.message += "\n%s" % resp.data
-            raise ResponseError(err)
+            raise ResponseError(err + "\n" + resp.data)
 
     def add_object(self, name):
         """ Add an object to the app.
