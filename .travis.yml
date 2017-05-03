@@ -5,10 +5,12 @@ python:
 - '3.3'
 - '3.4'
 - '3.5'
-install: pip install . mock nose pylint
+- '3.6'
+install: pip install . codecov flake8 pytest pytest-cov
 script:
-- nosetests
-- pylint knackhq
+- py.test --cov knackhq --cov-report term-missing
+- flake8 knackhq
+after_success: codecov
 deploy:
   provider: pypi
   user: amancevice
@@ -16,3 +18,4 @@ deploy:
     secure: oCK1ibUfQFW77+EfDFR5iCQOTbkQ4r3WH90Ecp/sTOLjt3xuGVr+A9uDvJ6rlK0e2p9UWOg8zB6WA2JgEgjbxStDZtojKz+iKWdiOTpKbcahncen/otxPTI6qZHmRgDB8bWnTZ/sRBDPP8n59jyEXAoG/hr7sf5XDmS+snvErbW5yPBvKExzFnG43fUh/kJpFudRtptGn5de3BPaQXJNQXQ9aUvjlyFwtKaw7FHMgjwa0Zfk1nM/dEju6ylfjrhu+FkV43DdZk/7ggT8uTQe3xE4ZEeWR4VWpdIZhGzF2Znc9Kzz5PQYTtR4TG4w0BzGHbRhx5EiKUnEGWB/HcyLA+MOdhQIfleTL7ISyLJF3YQRGZ6oBo1gd8dpvBzFnwK6O8eXLQk/DgKdBHxduOuLSah7QnmxAZTd9NTYhpvWNXzSxXFlp09oMFoTqBn9n89cvZ2kAo5of0o99EKm4KxQFXHQx5yJLGGVp2WOBsczphuD3xOLBKyxZl6HvmW3tDnwupHTNezwVBO1FfuZhtXNbf+jbTPTD7LZSUlYi2gHUhqAWmDYzMpndqlKKAjIfCF8PWQYvXWH2fZhloOLe1X2ZvcMIdKEAHVr6Ri0h9v043Tx8YPNQamT4F5sdNk10M1gSV/vTff5vkoXjgIMaznohZOJcFPX9ygV+LExazRa6eg=
   on:
     tags: true
+    repo: amancevice/knackhq
