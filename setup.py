@@ -28,5 +28,4 @@ setup(name='knackhq',
                    'Operating System :: OS Independent',
                    'Programming Language :: Python :: 2.7',
                    'Topic :: Utilities'],
-      install_requires=['certifi>=2016.2.28',
-                        'requests>=2.11.1'])
+      install_requires=['requests>=2.11.1'])

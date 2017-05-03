@@ -6,8 +6,7 @@ import collections
 import json
 import os
 
-import certifi
-import urllib3
+import requests
 from .knackhq import KnackHQObject
 
 
@@ -24,7 +23,8 @@ class KnackHQClient(collections.Iterable):
         Arguments:
             app_id   (str):  Application ID string
             api_key  (str):  API key
-            endpoint (str):  KnackHQ endpoint (default: https://api.knackhq.com/v1)
+            endpoint (str):  KnackHQ endpoint
+                             [default: https://api.knackhq.com/v1]
     """
     def __init__(self, app_id=None, api_key=None, endpoint=None):
         self._app_id = app_id or os.getenv('KNACKHQ_APP_ID')
@@ -32,6 +32,9 @@ class KnackHQClient(collections.Iterable):
         self._endpoint = endpoint \
             or os.getenv('KNACKHQ_ENDPOINT') \
             or 'https://api.knackhq.com/v1'
+        self._headers = {'Content-Type': 'application/json',
+                         'X-Knack-Application-Id': self._app_id,
+                         'X-Knack-REST-API-Key': self._api_key}
 
     def __repr__(self):
         return "<KnackHQClient %s>" % self._endpoint
@@ -61,16 +64,12 @@ class KnackHQClient(collections.Iterable):
             Raises:
                 ValueError on bad response.
         """
-        head = {
-            "Content-Type": "application/json",
-            "X-Knack-Application-Id": self._app_id,
-            "X-Knack-REST-API-Key": self._api_key}
-        http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-        resp = http.request(verb, endpoint, headers=head, **kwargs)
+        kwargs.setdefault('headers', self._headers)
+        resp = requests.request(verb, endpoint, **kwargs)
         try:
-            return json.loads(resp.data)
+            return resp.json()
         except ValueError as err:
-            raise ResponseError(err + "\n" + resp.data)
+            raise ResponseError(err)
 
     def add_object(self, name):
         """ Add an object to the app.
@@ -90,7 +89,9 @@ class KnackHQClient(collections.Iterable):
             endpoint = os.path.join(self._endpoint, 'objects')
             body = json.dumps({'name': name})
             response = self.request(endpoint, 'POST', body=body)
-            endpoint = os.path.join(self._endpoint, 'objects', response['object']['key'])
+            endpoint = os.path.join(self._endpoint,
+                                    'objects',
+                                    response['object']['key'])
             return KnackHQObject(self, endpoint, **response)
 
         raise DuplicateObjectError("More than one object named '%s'" % name)
@@ -115,7 +116,9 @@ class KnackHQClient(collections.Iterable):
             endpoint = os.path.join(self._endpoint, 'objects', key_or_name)
             response = self.request(endpoint)
         except ResponseError:
-            endpoint = os.path.join(self._endpoint, 'objects', self._object_key(key_or_name))
+            endpoint = os.path.join(self._endpoint,
+                                    'objects',
+                                    self._object_key(key_or_name))
             response = self.request(endpoint)
 
         return KnackHQObject(client=self, endpoint=endpoint, **response)
@@ -137,7 +140,8 @@ class KnackHQClient(collections.Iterable):
         if len(objects) == 1:
             return objects[0]['key']
         elif len(objects) > 1:
-            raise DuplicateObjectError("More than one object named '%s'" % name)
+            raise DuplicateObjectError("More than one object named '{name}'"
+                                       .format(name=name))
         raise ObjectNotFoundError(name)
 
 

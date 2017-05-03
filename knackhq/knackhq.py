@@ -6,21 +6,12 @@ import json
 import os
 import re
 
-# Python2
-try:
-    from urllib import quote_plus
-    from urlparse import urlparse
-
-# Python3
-except ImportError:
-    # pylint: disable=ungrouped-imports
-    from urllib.parse import urlparse
-    from urllib.parse import quote_plus
+from requests.compat import urlparse
+from requests.compat import quote_plus
 
 
 class KnackHQRecord(collections.Mapping):
-    """ KnackHQ Record.
-    """
+    """ KnackHQ Record. """
     @property
     def object(self):
         """ Memoized response of a GET on the record parent. """
@@ -53,8 +44,8 @@ class KnackHQRecord(collections.Mapping):
             if len(fields) == 1:
                 field_key = fields[0]['key']
                 field_raw = "%s_raw" % field_key
-                is_field = lambda x: x in (field_key, field_raw)
-                return dict([(key, val) for key, val in self.record.items() if is_field(key)])
+                return dict([(key, val) for key, val in self.record.items()
+                             if key in (field_key, field_raw)])
 
             raise KeyError("More than one field named '%s'" % key)
 
@@ -100,7 +91,7 @@ class KnackHQObject(collections.Iterable):
             self._object = self._client.request(self._endpoint)['object']
         return self._object
 
-     # pylint: disable=redefined-builtin
+    # pylint: disable=redefined-builtin
     def __init__(self, client=None, endpoint=None, object=None):
         self._client = client
         self._endpoint = endpoint
@@ -178,9 +169,12 @@ class KnackHQObject(collections.Iterable):
             except ValueError:
                 raise StopIteration
             for record in page['records']:
-                endpoint = os.path.join(self._endpoint, 'records', record['id'])
+                endpoint = os.path.join(self._endpoint,
+                                        'records',
+                                        record['id'])
                 yield KnackHQRecord(self._client, endpoint, record)
 
             # Recurse
             kwargs['page'] = int(page['current_page']) + 1
-            self.where(**kwargs)
+            for record in self.where(**kwargs):
+                yield record

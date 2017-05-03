@@ -51,7 +51,7 @@ Iterate over objects in an app using the `client` object:
 
 ```python
 for obj in client:
-    print obj
+    print(obj)
 
 # => <KnackHQObject /v1/objects/object_1>
 #    <KnackHQObject /v1/objects/object_2>
@@ -99,7 +99,7 @@ Iterate over records in an object:
 
 ```python
 for record in obj:
-    print record
+    print(record)
 
 # => <KnackHQRecord /v1/objects/object_1/records/...>
 #    <KnackHQRecord /v1/objects/object_2/records/...>
