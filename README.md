@@ -1,6 +1,6 @@
 # knackhq
 
-Python wrapper for [KnackHQ API](http://knackhq.com/)
+Python wrapper for [KnackHQ API](https://www.knack.com/developer-documentation/)
 
 [![Build Status](https://travis-ci.org/amancevice/knackhq.svg?branch=master)](https://travis-ci.org/amancevice/knackhq)
 [![PyPI version](https://badge.fury.io/py/knackhq.svg)](https://badge.fury.io/py/knackhq)
@@ -15,7 +15,7 @@ pip install knackhq
 
 ## Connect to KnackHQ
 
-Create a `KnackHQClient` instance to begin interacting with KnackHQ. Supply an app ID, an API key, and an optional API endpoint URL to the client. Alternatively, set these values in your environment with:
+Create a `KnackApp` instance to begin interacting with KnackHQ. Supply an app ID, an API key, and an optional API endpoint URL to the client. Alternatively, set these values in your environment with:
 
 * `KNACKHQ_APP_ID`
 * `KNACKHQ_API_KEY`
@@ -28,7 +28,7 @@ import knackhq
 # KNACKHQ_API_KEY = <set in ENV>
 # KNACKHQ_ENDPOINT = <set in ENV>
 
-client = knackhq.KnackHQClient()
+app = knackhq.KnackApp()
 ```
 
 
@@ -37,87 +37,47 @@ client = knackhq.KnackHQClient()
 
 ### Raw requests
 
-In some cases you may wish to send a raw HTTP request to the KnackHQ JSON API. This will not normally be necessary but it is available:
+You may wish to send a raw request response from the KnackHQ API:
 
 ```python
-client.request("https://api.knackhq.com/v1/objects/object_1", 'GET')
-client.request("https://api.knackhq.com/v1/objects/object_1", 'POST', body='{key: val}')
+app.request('GET', 'objects/object_1/records')  # or,
+app.request('GET', 'objects', 'object_1', 'records')
 ```
 
 
-### Reading Objects
+### Getting Objects
 
-Iterate over objects in an app using the `client` object:
+Use dictionary syntax to get objects by name or key:
 
 ```python
-for obj in client:
-    print(obj)
-
-# => <KnackHQObject /v1/objects/object_1>
-#    <KnackHQObject /v1/objects/object_2>
-#    <KnackHQObject /v1/objects/object_3>
-#    ...
-#    <KnackHQObject /v1/objects/object_n>
+obj = app['object_1']  # or,
+obj = app['MyObject']
 ```
 
-Or, find an object by its key:
+Access object metadata using dictionary syntax:
 
 ```python
-obj = client.get_object('object_1')
-```
-
-If you are unsure of the key, use the `name` keyword argument to get the object by its name:
-
-```python
-obj = client.get_object(name='Customers')
-```
-
-Find metadata keys using the `keys()` function. Get metadata on an object using brackets (`[]`):
-
-```python
-obj.keys()
-
-# => ['status',
-#     'tasks',
-#     'name',
-#     'inflections',
-#     'fields',
-#     'connections',
-#     'user',
-#     'key',
-#     '_id']
-
+obj['name']
 obj['key']
-
-# => 'object_1'
+obj['fields']
 ```
 
+### Getting Records
 
-### Reading Records
-
-Iterate over records in an object:
+Use the `get_records()` method to iterate over records in an object:
 
 ```python
-for record in obj:
+for record in obj.get_records():
     print(record)
-
-# => <KnackHQRecord /v1/objects/object_1/records/...>
-#    <KnackHQRecord /v1/objects/object_2/records/...>
-#    <KnackHQRecord /v1/objects/object_3/records/...>
-#    ...
-#    <KnackHQRecord /v1/objects/object_n/records/...>
 ```
 
-Use the `where()` function to filter records. Where accepts the following keyword-arguments:
-
+Supply arguments to `get_records()` to filter records. Options include:
 * `record_id`
 * `page`
 * `rows_per_page`
 * `sort_field`
 * `sort_order`
 * `filters`
-
-If `record_id` is provided (and the record exists) `where(record_id=<id>)` will yield a collection of length 1.
 
 Use `filters` to refine your search:
 
@@ -133,17 +93,17 @@ filters = [
     }
 ]
 
-for record in obj.where(filters=filters):
-    print record
+for record in obj.get_records(filters=filters):
+    print(record)
+```
 
-# => <KnackHQRecord /v1/objects/object_1/records/...>
-#    <KnackHQRecord /v1/objects/object_2/records/...>
-#    <KnackHQRecord /v1/objects/object_3/records/...>
-#    ...
-#    <KnackHQRecord /v1/objects/object_n/records/...>
+If you know the ID of the record, use `get_record()` to return a single record:
+
+```python
+record = obj.get_record('1234567890ABCDEF')
 ```
 
 
-## Writing to KnackHQ
+## Writing Records
 
 *TODO*
