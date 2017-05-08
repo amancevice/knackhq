@@ -1,8 +1,4 @@
 """ KnackHQ API Client """
+from .knackhq import KnackApp
 
-
-from .client import KnackHQClient
-from .knackhq import KnackHQObject, KnackHQRecord
-
-
-__version__ = '0.0.4'
+__version__ = '0.1.0'
