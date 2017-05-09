@@ -2,8 +2,9 @@
 
 Python wrapper for [KnackHQ API](https://www.knack.com/developer-documentation/)
 
-[![Build Status](https://travis-ci.org/amancevice/knackhq.svg?branch=master)](https://travis-ci.org/amancevice/knackhq)
-[![PyPI version](https://badge.fury.io/py/knackhq.svg)](https://badge.fury.io/py/knackhq)
+[![build](https://travis-ci.org/amancevice/knackhq.svg?branch=master)](https://travis-ci.org/amancevice/knackhq)
+[![codecov](https://codecov.io/gh/amancevice/knackhq/branch/master/graph/badge.svg)](https://codecov.io/gh/amancevice/knackhq)
+[![pypi](https://badge.fury.io/py/knackhq.svg)](https://badge.fury.io/py/knackhq)
 
 
 ## Installation

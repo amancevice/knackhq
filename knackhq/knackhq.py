@@ -123,7 +123,7 @@ class KnackApp(KnackMapping):
         obj = self.get_json('objects', object_key)
         if not obj:
             raise exc.ObjectNotFoundError(object_key)
-        return KnackObject(self, **obj['object'])
+        return KnackObject(self, obj['object'])
 
     def get_records(self, object_key, **query):
         """ Get a RecordCollection instance.
@@ -183,7 +183,7 @@ class KnackObject(KnackMapping):
             obj (dict):      Object definition
     """
     # pylint: disable=super-init-not-called
-    def __init__(self, app, **obj):
+    def __init__(self, app, obj):
         self.app = app
         self.object = obj
 
