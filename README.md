@@ -16,19 +16,21 @@ pip install knackhq
 
 ## Connect to KnackHQ
 
-Create a `KnackApp` instance to begin interacting with KnackHQ. Supply an app ID, an API key, and an optional API endpoint URL to the client. Alternatively, set these values in your environment with:
-
-* `KNACKHQ_APP_ID`
-* `KNACKHQ_API_KEY`
-* `KNACKHQ_ENDPOINT`
+Create a `KnackApp` instance to begin interacting with KnackHQ. Supply an app ID, an API key, and an optional API endpoint URL to the client:
 
 ```python
 import knackhq
 
-# KNACKHQ_APP_ID = <set in ENV>
-# KNACKHQ_API_KEY = <set in ENV>
-# KNACKHQ_ENDPOINT = <set in ENV>
+app = knackhq.KnackApp('<app_id>', '<api_key>')
+```
 
+Alternatively, set these values in your environment with:
+
+* `KNACKHQ_APP_ID`
+* `KNACKHQ_API_KEY`
+* `KNACKHQ_ENDPOINT` (optional)
+
+```python
 app = knackhq.KnackApp()
 ```
 
