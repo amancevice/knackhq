@@ -6,7 +6,7 @@ import os
 from collections import abc
 
 import requests
-from . import exc
+from knackhq import exceptions
 
 
 class KnackIterable(abc.Iterable):
@@ -96,13 +96,14 @@ class KnackApp(KnackMapping):
 
         # Raise NotFoundError
         elif response.status_code == 400:
-            raise exc.NotFoundError
+            raise exceptions.NotFoundError
 
         # Raise API error
         headers = {x: y for x, y in response.headers.items()
                    if x.startswith('X-')}
         err = {'Status Code': response.status_code, 'Headers': headers}
-        raise exc.ApiResponseError(json.dumps(err, indent=4, sort_keys=True))
+        msg = json.dumps(err, indent=4, sort_keys=True)
+        raise exceptions.ApiResponseError(msg)
 
     def get_objects(self):
         """ Get an ObjectCollection instance. """
@@ -119,7 +120,7 @@ class KnackApp(KnackMapping):
         """
         obj = self.get_json('objects', object_key)
         if not obj:
-            raise exc.ObjectNotFoundError(object_key)
+            raise exceptions.ObjectNotFoundError(object_key)
         return KnackObject(self, obj['object'])
 
     def get_records(self, object_key, **query):
@@ -160,8 +161,8 @@ class ObjectCollection(KnackMapping):
             object_key = self._names[object_key]
         try:
             return self.app.get_object(object_key)
-        except exc.ApiResponseError:
-            raise exc.ObjectNotFoundError(object_key)
+        except exceptions.ApiResponseError:
+            raise exceptions.ObjectNotFoundError(object_key)
 
     def __iter__(self):
         for obj in self.objects:

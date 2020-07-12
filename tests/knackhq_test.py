@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 from knackhq.knackhq import *
-from knackhq.exc import *
+from knackhq.exceptions import *
 
 KnackApp.APP_ID = 'app_id'
 KnackApp.API_KEY = 'api_key'
