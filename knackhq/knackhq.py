@@ -6,35 +6,40 @@ import os
 from collections import abc
 
 import requests
+
 from knackhq import exceptions
 
 
 class KnackIterable(abc.Iterable):
-    """ Base KnackHQ Iterable Python object. """
+    """
+    Base KnackHQ Iterable Python object.
+    """
     def __repr__(self):
-        return "{cls}({self})".format(cls=type(self).__name__, self=self)
+        return '{cls}({self})'.format(cls=type(self).__name__, self=self)
 
 
 class KnackMapping(abc.Mapping):
-    """ Base KnackHQ Mapping Python object. """
+    """
+    Base KnackHQ Mapping Python object.
+    """
     def __repr__(self):
-        return "{cls}({self})".format(cls=type(self).__name__, self=self)
+        return '{cls}({self})'.format(cls=type(self).__name__, self=self)
 
 
 class KnackApp(KnackMapping):
-    """ KnackHQ Application.
+    """
+    KnackHQ Application.
 
-        Use arguments or ENV variables to initialize client.
+    Use arguments or ENV variables to initialize client.
 
-        Optional ENV variables are:
-            * KNACKHQ_APP_ID
-            * KNACKHQ_API_KEY
-            * KNACKHQ_ENDPOINT
+    Optional ENV variables are:
+    - KNACKHQ_APP_ID
+    - KNACKHQ_API_KEY
+    - KNACKHQ_ENDPOINT
 
-        Arguments:
-            app_id   (str):  Application ID string
-            api_key  (str):  API key
-            endpoint (str):  KnackHQ endpoint
+    :param str app_id: Application ID string
+    :param str api_key: API key
+    :param str endpoint: KnackHQ endpoint
     """
     APP_ID = os.getenv('KNACKHQ_APP_ID')
     API_KEY = os.getenv('KNACKHQ_API_KEY')
@@ -44,9 +49,11 @@ class KnackApp(KnackMapping):
         self.app_id = app_id or self.APP_ID
         self.api_key = api_key or self.API_KEY
         self.endpoint = endpoint or self.ENDPOINT
-        self.headers = {'Content-Type': 'application/json',
-                        'X-Knack-Application-Id': self.app_id,
-                        'X-Knack-REST-API-Key': self.api_key}
+        self.headers = {
+            'Content-Type': 'application/json',
+            'X-Knack-Application-Id': self.app_id,
+            'X-Knack-REST-API-Key': self.api_key,
+        }
 
     def __str__(self):
         return self.endpoint
@@ -62,31 +69,25 @@ class KnackApp(KnackMapping):
         return len(self.get_objects())
 
     def request(self, method, *path):
-        """ Get the raw response of an API request.
+        """
+        Get the raw response of an API request.
 
-            Arguments:
-                method (str):  Request verb
-                path   (str):  Path to API endpoint (eg, 'objects/object_1')
-
-            Returns:
-                response object
+        :param str method: Request verb
+        :param str path: Path to API endpoint (eg, 'objects/object_1')
+        :returns: response object
         """
         uri = os.path.join(self.endpoint, *path)
         response = requests.request(method, uri, headers=self.headers)
         return response
 
     def get_json(self, *path):
-        """ Get the JSON response of an API request.
+        """
+        Get the JSON response of an API request.
 
-            Arguments:
-                path (str):  Path to API endpoint (eg, 'objects/object_1')
-
-            Returns:
-                JSON response
-
-            Raises:
-                NotFoundError if status code is 400
-                ApiResponseError if status code is not 200 or 400
+        :param str path:  Path to API endpoint (eg, 'objects/object_1')
+        :returns dict: JSON response
+        :raises NotFoundError: Status code is 400
+        :raises ApiResponseError: Status code is not 200 or 400
         """
         response = self.request('GET', *path)
 
@@ -99,24 +100,29 @@ class KnackApp(KnackMapping):
             raise exceptions.NotFoundError
 
         # Raise API error
-        headers = {x: y for x, y in response.headers.items()
-                   if x.startswith('X-')}
-        err = {'Status Code': response.status_code, 'Headers': headers}
+        headers = {
+            x: y for x, y in response.headers.items()
+            if x.startswith('X-')
+        }
+        err = {
+            'Status Code': response.status_code,
+            'Headers': headers,
+        }
         msg = json.dumps(err, indent=4, sort_keys=True)
         raise exceptions.ApiResponseError(msg)
 
     def get_objects(self):
-        """ Get an ObjectCollection instance. """
+        """
+        Get an ObjectCollection instance.
+        """
         return ObjectCollection(self, **self.get_json('objects'))
 
     def get_object(self, object_key):
-        """ Get a KnackObject instance.
+        """
+        Get a KnackObject instance.
 
-            Arguments:
-                object_key (str):  KnackHQ object key
-
-            Returns:
-                KnackObject instance.
+        :param str object_key: KnackHQ object key
+        :returns KnackObject: KnackObject instance
         """
         obj = self.get_json('objects', object_key)
         if not obj:
@@ -124,29 +130,38 @@ class KnackApp(KnackMapping):
         return KnackObject(self, obj['object'])
 
     def get_records(self, object_key, **query):
-        """ Get a RecordCollection instance.
+        """
+        Get a RecordCollection instance.
 
-            Use the query parameter to define KnackHQ API query parameters.
+        Use the query parameter to define KnackHQ API query parameters.
 
-            Ex:
-                get_records('object_1', filters=[{'field':    'field_1',
-                                                  'operator': 'is',
-                                                  'value':    'test'},
-                                                 {'field':    'field_2',
-                                                  'operator': 'is not blank'}])
+        :param str object_key:  KnackHQ object key
+        :param dict query: KnackHQ API query parameters
+        :returns RecordCollection: RecordCollection instance
 
-            Arguments:
-                object_key (str):   KnackHQ object key
-                query      (dict):  KnackHQ API query parameters
-
-            Returns:
-                RecordCollection instance.
+        :Example:
+        >>> app.get_records(
+                'object_1',
+                filters=[
+                    {
+                        'field': 'field_1',
+                        'operator': 'is',
+                        'value': 'test',
+                    },
+                    {
+                        'field': 'field_2',
+                        'operator': 'is not blank',
+                    },
+                ],
+            )
         """
         return RecordCollection(self.get_object(object_key), query)
 
 
 class ObjectCollection(KnackMapping):
-    """ Collection of KnackHQ Objects. """
+    """
+    Collection of KnackHQ Objects.
+    """
     def __init__(self, app, objects):
         self.app = app
         self.objects = objects
@@ -173,11 +188,8 @@ class ObjectCollection(KnackMapping):
 
 
 class KnackObject(KnackMapping):
-    """ KnackHQ Object.
-
-        Arguments:
-            app (KnackApp):  KnackApp instance
-            obj (dict):      Object definition
+    """
+    KnackHQ Object.
     """
     def __init__(self, app, obj):
         self.app = app
@@ -197,54 +209,63 @@ class KnackObject(KnackMapping):
         return len(self.object)
 
     def get_records(self, **query):
-        """ Get a RecordCollection instance.
+        """
+        Get a RecordCollection instance.
 
-            Use the query parameter to define KnackHQ API query parameters.
+        Use the query parameter to define KnackHQ API query parameters.
 
-            Ex:
-                get_records('object_1', filters=[{'field':    'field_1',
-                                                  'operator': 'is',
-                                                  'value':    'test'},
-                                                 {'field':    'field_2',
-                                                  'operator': 'is not blank'}])
+        :param str object_key: KnackHQ object key
+        :param dict query: KnackHQ API query parameters
+        :returns RecordCollection: RecordCollection instance
 
-            Arguments:
-                object_key (str):   KnackHQ object key
-                query      (dict):  KnackHQ API query parameters
+        :Example:
+        >>> obj.get_records(
+                'object_1', filters=[
+                    {
+                        'field': 'field_1',
+                        'operator': 'is',
+                        'value': 'test',
+                    },
+                    {
+                        'field': 'field_2',
+                        'operator': 'is not blank',
+                    },
+                ],
+            )
 
-            Returns:
-                RecordCollection instance.
         """
         return RecordCollection(self, query)
 
     def get_record(self, record_id):
-        """ Get single KnackRecord instance.
+        """
+        Get single KnackRecord instance.
 
-            Arguments:
-                record_id (str):  KnackHQ record ID
-
-            Returns:
-                KnackRecord instance.
+        :param str record_id: KnackHQ record ID
+        :returns KnackRecord: KnackRecord instance
         """
         for record in self.get_records(record_id=record_id):
             return record
 
 
 class RecordCollection(KnackIterable):
-    """ Collection of KnackHQ Object Records. """
+    """
+    Collection of KnackHQ Object Records.
+    """
     def __init__(self, obj, query):
         self.object = obj
         self.app = self.object.app
-        self.query = query  # requests.compat.urlencode(query)
+        self.query = query
 
     def __str__(self):
         return os.path.join(str(self.object), 'records')
 
     def __iter__(self):
         qry = requests.compat.urlencode(self.query)
-        response = self.app.get_json('objects',
-                                     self.object['key'],
-                                     "records?{qry}".format(qry=qry))
+        response = self.app.get_json(
+            'objects',
+            self.object['key'],
+            'records?{qry}'.format(qry=qry),
+        )
         current_page = response['current_page']
         total_pages = response['total_pages']
 
@@ -259,14 +280,18 @@ class RecordCollection(KnackIterable):
 
     def __len__(self):
         qry = requests.compat.urlencode(self.query)
-        response = self.app.get_json('objects',
-                                     self.object['key'],
-                                     "records?{qry}".format(qry=qry))
+        response = self.app.get_json(
+            'objects',
+            self.object['key'],
+            'records?{qry}'.format(qry=qry),
+        )
         return response['total_records']
 
 
 class KnackRecord(KnackMapping):
-    """ KnackHQ Record. """
+    """
+    KnackHQ Record.
+    """
     def __init__(self, obj, record):
         self.object = obj
         self.record = record
