@@ -9,14 +9,12 @@ import requests
 from . import exc
 
 
-# pylint: disable=too-few-public-methods,abstract-method,no-init
 class KnackIterable(abc.Iterable):
     """ Base KnackHQ Iterable Python object. """
     def __repr__(self):
         return "{cls}({self})".format(cls=type(self).__name__, self=self)
 
 
-# pylint: disable=too-few-public-methods,abstract-method,no-init
 class KnackMapping(abc.Mapping):
     """ Base KnackHQ Mapping Python object. """
     def __repr__(self):
@@ -42,7 +40,6 @@ class KnackApp(KnackMapping):
     API_KEY = os.getenv('KNACKHQ_API_KEY')
     ENDPOINT = os.getenv('KNACKHQ_ENDPOINT', 'https://api.knackhq.com/v1')
 
-    # pylint: disable=super-init-not-called
     def __init__(self, app_id=None, api_key=None, endpoint=None):
         self.app_id = app_id or self.APP_ID
         self.api_key = api_key or self.API_KEY
@@ -149,7 +146,6 @@ class KnackApp(KnackMapping):
 
 class ObjectCollection(KnackMapping):
     """ Collection of KnackHQ Objects. """
-    # pylint: disable=super-init-not-called
     def __init__(self, app, objects):
         self.app = app
         self.objects = objects
@@ -182,7 +178,6 @@ class KnackObject(KnackMapping):
             app (KnackApp):  KnackApp instance
             obj (dict):      Object definition
     """
-    # pylint: disable=super-init-not-called
     def __init__(self, app, obj):
         self.app = app
         self.object = obj
@@ -236,7 +231,6 @@ class KnackObject(KnackMapping):
 
 class RecordCollection(KnackIterable):
     """ Collection of KnackHQ Object Records. """
-    # pylint: disable=super-init-not-called
     def __init__(self, obj, query):
         self.object = obj
         self.app = self.object.app
@@ -272,7 +266,6 @@ class RecordCollection(KnackIterable):
 
 class KnackRecord(KnackMapping):
     """ KnackHQ Record. """
-    # pylint: disable=super-init-not-called
     def __init__(self, obj, record):
         self.object = obj
         self.record = record
