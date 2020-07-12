@@ -4,8 +4,18 @@ KnackHQ Tests
 from unittest import mock
 
 import pytest
-from knackhq.knackhq import *
-from knackhq.exceptions import *
+from knackhq.knackhq import (
+    KnackApp,
+    KnackObject,
+    KnackRecord,
+    ObjectCollection,
+    RecordCollection,
+)
+from knackhq.exceptions import (
+    ApiResponseError,
+    NotFoundError,
+    ObjectNotFoundError,
+)
 
 KnackApp.APP_ID = 'app_id'
 KnackApp.API_KEY = 'api_key'
