@@ -1,11 +1,12 @@
-# knackhq
+# KnackHQ
+
+![pypi](https://img.shields.io/pypi/v/knackhq?color=yellow&logo=python&logoColor=eee&style=flat-square)
+![python](https://img.shields.io/pypi/pyversions/knackhq?logo=python&logoColor=eee&style=flat-square)
+[![pytest](https://img.shields.io/github/workflow/status/amancevice/knackhq/pytest?logo=github&style=flat-square)](https://github.com/amancevice/knackhq/actions)
+[![coverage](https://img.shields.io/codeclimate/coverage/amancevice/knackhq?logo=code-climate&style=flat-square)](https://codeclimate.com/github/amancevice/knackhq/test_coverage)
+[![maintainability](https://img.shields.io/codeclimate/maintainability/amancevice/knackhq?logo=code-climate&style=flat-square)](https://codeclimate.com/github/amancevice/knackhq/maintainability)
 
 Python wrapper for [KnackHQ API](https://www.knack.com/developer-documentation/)
-
-[![build](https://travis-ci.org/amancevice/knackhq.svg?branch=master)](https://travis-ci.org/amancevice/knackhq)
-[![codecov](https://codecov.io/gh/amancevice/knackhq/branch/master/graph/badge.svg)](https://codecov.io/gh/amancevice/knackhq)
-[![pypi](https://badge.fury.io/py/knackhq.svg)](https://badge.fury.io/py/knackhq)
-
 
 ## Installation
 
