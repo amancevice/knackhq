@@ -1,31 +1,35 @@
-import os
-import re
-import textwrap
+from setuptools import find_packages
 from setuptools import setup
 
+with open('README.md', 'r') as readme:
+    long_description = readme.read()
 
-def version():
-    search = r"^__version__ *= *['\"]([0-9.]+)['\"]"
-    initpy = open('./knackhq/__init__.py').read()
-    return re.search(search, initpy, re.MULTILINE).group(1)
-
-
-setup(name='knackhq',
-      version=version(),
-      author='amancevice',
-      author_email='smallweirdnum@gmail.com',
-      packages=['knackhq'],
-      include_package_data=True,
-      url='http://www.smallweirdnumber.com',
-      description='Interact with KnackHQ API',
-      long_description=textwrap.dedent(
-          '''See GitHub_ for documentation.
-          .. _GitHub: https://github.com/amancevice/knackhq'''),
-      classifiers=['Development Status :: 3 - Alpha',
-                   'Intended Audience :: Developers',
-                   'Intended Audience :: System Administrators',
-                   'License :: OSI Approved :: MIT License',
-                   'Operating System :: OS Independent',
-                   'Programming Language :: Python :: 2.7',
-                   'Topic :: Utilities'],
-      install_requires=['requests>=2.11.1'])
+setup(
+    author='amancevice',
+    author_email='smallweirdnum@gmail.com',
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Topic :: Utilities',
+    ],
+    description='Interact with KnackHQ API',
+    install_requires=['requests >= 2.11'],
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    name='knackhq',
+    packages=find_packages(exclude=['tests']),
+    python_requires='>= 3.5',
+    setup_requires=['setuptools_scm'],
+    url='https://github.com/amancevice/knackhq',
+    use_scm_version=True,
+)
