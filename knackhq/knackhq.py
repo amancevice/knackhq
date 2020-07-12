@@ -1,23 +1,23 @@
 """
 KnackHQ Application Client.
 """
-import collections
 import json
 import os
+from collections import abc
 
 import requests
 from . import exc
 
 
 # pylint: disable=too-few-public-methods,abstract-method,no-init
-class KnackIterable(collections.Iterable):
+class KnackIterable(abc.Iterable):
     """ Base KnackHQ Iterable Python object. """
     def __repr__(self):
         return "{cls}({self})".format(cls=type(self).__name__, self=self)
 
 
 # pylint: disable=too-few-public-methods,abstract-method,no-init
-class KnackMapping(collections.Mapping):
+class KnackMapping(abc.Mapping):
     """ Base KnackHQ Mapping Python object. """
     def __repr__(self):
         return "{cls}({self})".format(cls=type(self).__name__, self=self)
