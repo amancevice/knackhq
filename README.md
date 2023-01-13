@@ -2,7 +2,7 @@
 
 ![pypi](https://img.shields.io/pypi/v/knackhq?color=yellow&logo=python&logoColor=eee&style=flat-square)
 ![python](https://img.shields.io/pypi/pyversions/knackhq?logo=python&logoColor=eee&style=flat-square)
-[![pytest](https://img.shields.io/github/actionsworkflow/status/amancevice/knackhq/pytest.yml?logo=github&style=flat-square)](https://github.com/amancevice/knackhq/actions/workflows/pytest.yml)
+[![pytest](https://img.shields.io/github/actions/workflow/status/amancevice/knackhq/pytest.yml?logo=github&style=flat-square)](https://github.com/amancevice/knackhq/actions/workflows/pytest.yml)
 [![coverage](https://img.shields.io/codeclimate/coverage/amancevice/knackhq?logo=code-climate&style=flat-square)](https://codeclimate.com/github/amancevice/knackhq/test_coverage)
 [![maintainability](https://img.shields.io/codeclimate/maintainability/amancevice/knackhq?logo=code-climate&style=flat-square)](https://codeclimate.com/github/amancevice/knackhq/maintainability)
 
