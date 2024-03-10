@@ -1,6 +1,7 @@
 """
 KnackHQ Application Client.
 """
+
 import json
 import os
 from collections import abc
